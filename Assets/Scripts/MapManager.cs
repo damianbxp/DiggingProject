@@ -26,5 +26,21 @@ public class MapManager: MonoBehaviour
                 map[i, j] = 1;
             }
         }
+
+        map[2, 2] = 0;
+        map[2, 3] = 0;
+        map[3, 2] = 0;
+        map[3, 3] = 0;
+
+        map[6, 0] = 0;
+        map[7, 0] = 0;
+        map[8, 0] = 0;
+        map[9, 0] = 0;
+
+        map[7, 1] = 0;
+        map[8, 1] = 0;
+        map[8, 2] = 0;
+
+
     }
 }
