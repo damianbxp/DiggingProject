@@ -60,12 +60,12 @@ public class MeshGenerator : MonoBehaviour {
                 wallVertices.Add(vertices[outline[i + 1]] - Vector3.up * wallHeight); // bottom right
 
                 wallTriangles.Add(startIndex + 0);
-                wallTriangles.Add(startIndex + 2);
                 wallTriangles.Add(startIndex + 3);
+                wallTriangles.Add(startIndex + 2);
 
                 wallTriangles.Add(startIndex + 3);
-                wallTriangles.Add(startIndex + 1);
                 wallTriangles.Add(startIndex + 0);
+                wallTriangles.Add(startIndex + 1);
             }
         }
 
@@ -73,7 +73,10 @@ public class MeshGenerator : MonoBehaviour {
         wallMesh.triangles = wallTriangles.ToArray();
         wallMesh.RecalculateNormals();
         walls.mesh = wallMesh;
+
         
+        MeshCollider wallCollider = walls.gameObject.GetComponent<MeshCollider>();
+        wallCollider.sharedMesh = wallMesh;
     }
 
     void CalculateMeshOutlines() {
