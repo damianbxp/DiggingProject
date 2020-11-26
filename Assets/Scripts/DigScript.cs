@@ -8,6 +8,11 @@ public class DigScript : MonoBehaviour
     float width, height;
     public MapManager mapManager;
     Vector3 digRayDirection;
+    public float aimSpeed;
+    public float shovelSize;
+    public float digRange;
+
+    float aimAngle = 3.14f;
 
     private void Start() {
         squareSize = mapManager.squareSize;
@@ -16,26 +21,12 @@ public class DigScript : MonoBehaviour
     }
 
     private void Update() {
-        float horizontal = 0;
-        float vertical = 0;
 
-        if(Input.GetKey(KeyCode.Keypad4)) horizontal--;
-        if(Input.GetKey(KeyCode.Keypad6)) horizontal++;
+        if(Input.GetKey(KeyCode.Keypad1)) aimAngle += aimSpeed*Time.deltaTime;
+        if(Input.GetKey(KeyCode.Keypad2)) aimAngle -= aimSpeed*Time.deltaTime;
+        
 
-        if(Input.GetKey(KeyCode.Keypad1)) {
-            horizontal-=0.5f;
-            vertical -= 0.5f;
-        }
-
-        if(Input.GetKey(KeyCode.Keypad3)) {
-            horizontal += 0.5f;
-            vertical -= 0.5f;
-        }
-
-        if(Input.GetKey(KeyCode.Keypad2)) vertical--;
-        if(Input.GetKey(KeyCode.Keypad8)) vertical++;
-
-        digRayDirection = new Vector3(horizontal, vertical).normalized;
+        digRayDirection = new Vector3(Mathf.Sin(aimAngle),Mathf.Cos(aimAngle)).normalized;
 
         Debug.DrawLine(transform.position, transform.position + digRayDirection * 3, Color.red);
         
@@ -46,16 +37,60 @@ public class DigScript : MonoBehaviour
 
     void Dig() {
         
-        if(Physics.Raycast(transform.position, digRayDirection, out RaycastHit hit, 5)) {
-            Debug.DrawLine(transform.position, hit.point, Color.green);
+        if(Physics.Raycast(transform.position, digRayDirection, out RaycastHit hit, digRange)) {
 
-            int x = Mathf.RoundToInt((hit.point.x + (width * squareSize) / 2 - squareSize/2) / squareSize);
-            int y = Mathf.RoundToInt((hit.point.y + (height * squareSize) / 2 - squareSize/2) / squareSize);
-            Debug.Log(new Vector2(x, y));
+            Vector3 boundaryLeftBot = hit.point - shovelSize * 0.5f * Vector3.right - shovelSize * 0.5f * Vector3.up;
+            Vector3 boundaryLeftTop = hit.point - shovelSize * 0.5f * Vector3.right + shovelSize * 0.5f * Vector3.up;
+            Vector3 boundaryRightBot = hit.point + shovelSize * 0.5f * Vector3.right - shovelSize * 0.5f * Vector3.up;
+            Vector3 boundaryRightTop = hit.point + shovelSize * 0.5f * Vector3.right + shovelSize * 0.5f * Vector3.up;
 
-            mapManager.map[x, y] = 0;
+
+            Debug.DrawLine(boundaryLeftBot, boundaryLeftTop, Color.blue, 10f);
+            Debug.DrawLine(boundaryLeftTop, boundaryRightTop, Color.blue, 10f);
+            Debug.DrawLine(boundaryRightTop, boundaryRightBot, Color.blue, 10f);
+            Debug.DrawLine(boundaryRightBot, boundaryLeftBot, Color.blue, 10f);
+
+
+
+            int xMin = getSquareX(boundaryLeftBot.x);
+            int xMax = getSquareX(boundaryRightBot.x);
+
+            int yMin = getSquareY(boundaryLeftBot.y);
+            int yMax = getSquareY(boundaryLeftTop.y);
+
+
+            for(int x = 0; x < xMax-xMin; x++) {
+                for(int y = 0; y < yMax-yMin; y++) {
+                    if(x + xMin > 0 && x + xMin < width - 1 && y + yMin >0 && y + yMin < height) {
+                        //Debug.Log(new Vector2(x + xMin, y + yMin));
+                        mapManager.map[x + xMin, y + yMin] = 0;
+                    } else {
+                        Debug.LogWarning("Digging out of array");
+                    }
+                }
+            }
+
+
             mapManager.ReloadMap();
         }
 
     }
+
+    int getSquareX(float xPos) {
+        float tempX = (width * squareSize + squareSize) / 2;
+        tempX += xPos;
+        tempX /= squareSize;
+
+        return Mathf.RoundToInt(tempX) - 1;
+    }
+
+    int getSquareY(float yPos) {
+        float tempY = (height * squareSize + squareSize) / 2;
+        tempY += yPos;
+        tempY /= squareSize;
+
+
+        return Mathf.RoundToInt(tempY) - 1;
+    }
+
 }

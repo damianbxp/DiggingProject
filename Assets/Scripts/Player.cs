@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     public float speed = 10;
 
+    public Vector3 debugLabelPosition;
     private Rigidbody rb;
 
     private void Start() {
@@ -17,5 +19,9 @@ public class Player : MonoBehaviour
         move *= speed * Time.fixedDeltaTime;
 
         rb.MovePosition(rb.position + move);
+    }
+
+    private void OnDrawGizmos() {
+        Handles.Label(transform.position + debugLabelPosition , "FPS: " + (Mathf.RoundToInt(1/Time.deltaTime)).ToString());
     }
 }

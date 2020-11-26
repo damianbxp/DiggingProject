@@ -30,5 +30,6 @@ public class MapManager: MonoBehaviour
                 map[i, j] = 1;
             }
         }
+
     }
 }
